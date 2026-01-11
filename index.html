@@ -80,7 +80,7 @@
 <body>
   <header>
     <div class="brand">Little Confession</div>
-    <span class="tag">Anonymous • Non‑commercial • Client‑side only</span>
+    <span class="tag"> </span>
   </header>
 
   <main class="wrap">
@@ -91,17 +91,17 @@
       <div class="divider"></div>
 
       <form id="confessForm" autocomplete="off">
-        <label for="recipient">Recipient name (public label on the wall)</label>
-        <input id="recipient" name="recipient" type="text" maxlength="60" placeholder="e.g., Alex" />
+        <label for="recipient">Recipient name </label>
+        <input id="recipient" name="recipient" type="text" maxlength="60" placeholder="e.g., Makashi" />
 
-        <label for="message">Your confession (limit ~400 words)</label>
+        <label for="message">Your confession (limit ~2000 words)</label>
         <textarea id="message" name="message" placeholder="Write your message here..."></textarea>
-        <div id="wordCount" class="count">Words: 0 / 400</div>
-        <p class="muted">Tip: Keep it kind. Don’t include private details or anything that could identify you or others.</p>
+        <div id="wordCount" class="count">Words: 0 / 2000</div>
+        <p class="muted">Tip: Keep it kind. Don’t include private details or anything that could identify you to others.</p>
 
         <div class="consent">
           <input type="checkbox" id="consent" />
-          <label for="consent">I understand this is anonymous and stored only in my browser (no servers, no identities).</label>
+          <label for="consent">I understand this is anonymous </label>
         </div>
 
         <button id="submitBtn" class="btn" type="submit" aria-disabled="true">Post to My Grand Wall</button>
@@ -145,7 +145,7 @@
             <circle cx="80" cy="40" r="2.5" fill="#8fd0ff"/>
           </g>
         </svg>
-        <p class="muted" style="text-align:center;margin-top:6px;">Lycoris radiata (blue) — a symbol of feelings revealed.</p>
+        <p class="muted" style="text-align:center;margin-top:6px;">This is Blue spider lilies. Be wary when holding them. </p>
       </div>
     </section>
 
@@ -156,14 +156,13 @@
           <h2>Grand Wall</h2>
           <p class="muted">Anonymous confessions stored in <strong>your</strong> browser.</p>
         </div>
-        <span class="pill">No identities • No tracking • No servers</span>
       </div>
       <div class="divider"></div>
 
       <div class="row">
         <div>
           <label for="filterName">Filter by recipient</label>
-          <input id="filterName" type="text" placeholder="e.g., Alex" />
+          <input id="filterName" type="text" placeholder="e.g., Makashi" />
         </div>
         <div>
           <label for="sortBy">Sort</label>
@@ -187,7 +186,7 @@
   </main>
 
   <footer>
-    <p>Non‑commercial • Anonymous • Client‑side only • © Little Confession</p>
+    <p> • Anonymous  © Little Confession</p>
   </footer>
 
   <script>
@@ -212,13 +211,13 @@
     }
     function updateWordCount() {
       const n = countWords(messageEl.value);
-      wordCountEl.textContent = `Words: ${n} / 400`;
-      wordCountEl.className = 'count ' + (n <= 350 ? 'ok' : n <= 400 ? 'warn' : 'danger');
+      wordCountEl.textContent = `Words: ${n} / 2000`;
+      wordCountEl.className = 'count ' + (n <= 1500 ? 'ok' : n <= 2000 ? 'warn' : 'danger');
     }
     function updateButtonState() {
       const nameOk = recipientEl.value.trim().length > 0;
       const words = countWords(messageEl.value);
-      const wordsOk = words > 0 && words <= 400;
+      const wordsOk = words > 0 && words <= 2000;
       const ok = consentEl.checked && nameOk && wordsOk;
       if (ok) {
         submitBtn.classList.add('enabled');
@@ -293,8 +292,8 @@
       const recipient = recipientEl.value.trim();
       const message = messageEl.value.trim();
       const words = countWords(message);
-      if (!recipient || words === 0 || words > 400) {
-        alert('Please provide a recipient and a message within 400 words.');
+      if (!recipient || words === 0 || words > 2000) {
+        alert('Please provide a recipient and a message within 2000 words.');
         return;
       }
       const items = loadWall();
@@ -325,5 +324,4 @@
     renderWall();
   </script>
 </body>
-
 </html>
