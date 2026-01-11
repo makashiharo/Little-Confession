@@ -5,6 +5,29 @@
   <title>Little Confession — Anonymous Grand Wall</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Anonymous, non-commercial confession wall. No identities collected. Client-side only." />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
+</head>
+<body>
+</body>
+</html>
+
+
   <style>
     :root {
       --bg: #0f1216; --panel: #161b22; --text: #e6e6e6; --muted: #9aa3ad;
