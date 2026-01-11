@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,29 +7,6 @@
   <title>Little Confession — Anonymous Grand Wall</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Anonymous, non-commercial confession wall. No identities collected. Client-side only." />
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-  </script>
-</head>
-<body>
-</body>
-</html>
-
-
   <style>
     :root {
       --bg: #0f1216; --panel: #161b22; --text: #e6e6e6; --muted: #9aa3ad;
@@ -177,7 +156,7 @@
       <div class="wallHeader">
         <div>
           <h2>Grand Wall</h2>
-          <p class="muted">Anonymous confessions stored in <strong>your</strong> browser.</p>
+          <p class="muted">Anonymous confessions from everyone.</p>
         </div>
       </div>
       <div class="divider"></div>
@@ -198,7 +177,7 @@
       </div>
 
       <div class="actions">
-        <button id="viewAll" class="action">View messages</button>
+        <!-- The "View messages" button is now handled by the Firebase listener -->
         <button id="clearAll" class="action" title="Clears only your browser’s copy">Clear my wall</button>
       </div>
 
@@ -209,10 +188,37 @@
   </main>
 
   <footer>
-    <p> • Anonymous  © Little Confession</p>
+    <p> • Anonymous © Little Confession</p>
   </footer>
 
+  <!-- Firebase SDKs - BEGIN -->
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <!-- Firebase Realtime Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+
   <script>
+    // Your Firebase project configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY", // <<< REPLACE with your actual API key from Firebase Project Settings
+      authDomain: "little-confession-39666.firebaseapp.com",
+      databaseURL: "https://little-confession-39666-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "little-confession-39666",
+      storageBucket: "little-confession-39666.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // <<< REPLACE with your actual sender ID from Firebase Project Settings
+      appId: "YOUR_APP_ID" // <<< REPLACE with your actual App ID from Firebase Project Settings
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+
+    // Get a reference to the Realtime Database service
+    const database = firebase.database();
+    const messagesRef = database.ref('messages'); // Reference to your 'messages' path in RTDB
+
+    // Firebase SDKs - END
+
+
     // Elements
     const form = document.getElementById('confessForm');
     const recipientEl = document.getElementById('recipient');
@@ -224,7 +230,7 @@
     const filterNameEl = document.getElementById('filterName');
     const sortByEl = document.getElementById('sortBy');
     const wallListEl = document.getElementById('wallList');
-    const viewAllBtn = document.getElementById('viewAll');
+    const viewAllBtn = document.getElementById('viewAll'); // This button's functionality will change
     const clearAllBtn = document.getElementById('clearAll');
 
     // Utilities
@@ -256,36 +262,28 @@
     consentEl.addEventListener('change', updateButtonState);
     updateWordCount(); updateButtonState();
 
-    // Storage (client-side only)
-    const KEY = 'little_confession_wall';
-    function loadWall() {
-      try {
-        const raw = localStorage.getItem(KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch { return []; }
-    }
-    function saveWall(items) {
-      localStorage.setItem(KEY, JSON.stringify(items));
-    }
+    // Removed localStorage functions: loadWall and saveWall are no longer needed.
+
+    // Storage (now uses Firebase Realtime Database)
+    let allConfessions = []; // This will hold the confessions fetched from Firebase
 
     // Render
-    function renderWall() {
-      const items = loadWall();
+    function renderWall(confessionsToRender) {
       const q = filterNameEl.value.trim().toLowerCase();
-      let list = items.slice();
+      let list = confessionsToRender.slice(); // Use the passed confessions
 
       // Sort
       const sortBy = sortByEl.value;
-      if (sortBy === 'newest') list.sort((a,b) => b.ts - a.ts);
-      if (sortBy === 'oldest') list.sort((a,b) => a.ts - b.ts);
-      if (sortBy === 'recipient') list.sort((a,b) => a.recipient.localeCompare(b.recipient));
+      if (sortBy === 'newest') list.sort((a, b) => b.ts - a.ts);
+      if (sortBy === 'oldest') list.sort((a, b) => a.ts - b.ts);
+      if (sortBy === 'recipient') list.sort((a, b) => a.recipient.localeCompare(b.recipient));
 
       // Filter
       if (q) list = list.filter(i => i.recipient.toLowerCase().includes(q));
 
       wallListEl.innerHTML = '';
       if (list.length === 0) {
-        wallListEl.innerHTML = '<div class="card muted">No messages yet. Post one on the left and click “View messages”.</div>';
+        wallListEl.innerHTML = '<div class="card muted">No messages yet. Post one on the left to share it with everyone!</div>';
         return;
       }
       for (const item of list) {
@@ -293,7 +291,7 @@
         card.className = 'card';
         const date = new Date(item.ts).toLocaleString();
         card.innerHTML = `
-          <div class="name">${item.recipient}</div>
+          <div class="name">${escapeHtml(item.recipient)}</div>
           <div class="muted" style="font-size:0.85rem;">Posted ${date}</div>
           <div class="msg">${escapeHtml(item.message)}</div>
         `;
@@ -308,8 +306,8 @@
       }[s]));
     }
 
-    // Submit
-    form.addEventListener('submit', (e) => {
+    // Submit function updated to use Firebase Realtime Database
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!consentEl.checked) { alert('Please confirm consent.'); return; }
       const recipient = recipientEl.value.trim();
@@ -319,32 +317,54 @@
         alert('Please provide a recipient and a message within 2000 words.');
         return;
       }
-      const items = loadWall();
-      items.push({ recipient, message, ts: Date.now() });
-      saveWall(items);
 
-      // Clear inputs and refresh wall
-      recipientEl.value = '';
-      messageEl.value = '';
-      consentEl.checked = false;
-      updateWordCount(); updateButtonState();
-      renderWall();
-      alert('Posted anonymously to your Grand Wall (stored only in your browser).');
-    });
+      const newConfession = { recipient, message, ts: Date.now() };
 
-    // Viewer controls
-    viewAllBtn.addEventListener('click', renderWall);
-    filterNameEl.addEventListener('input', renderWall);
-    sortByEl.addEventListener('change', renderWall);
-    clearAllBtn.addEventListener('click', () => {
-      if (confirm('Clear your Grand Wall? This removes only your browser’s copy.')) {
-        localStorage.removeItem(KEY);
-        renderWall();
+      try {
+        await messagesRef.push(newConfession); // Pushes data to Firebase
+        // Clear inputs after successful push
+        recipientEl.value = '';
+        messageEl.value = '';
+        consentEl.checked = false;
+        updateWordCount();
+        updateButtonState();
+        alert('Confession posted anonymously to the Grand Wall!');
+      } catch (error) {
+        console.error("Error writing new confession to Firebase: ", error);
+        alert('Failed to post confession. Please try again.');
       }
     });
 
-    // Initial render
-    renderWall();
+    // Viewer controls updated for Firebase Realtime Database
+    // The viewAllBtn is no longer strictly necessary as data loads automatically.
+    // We'll keep the event listeners for filter and sort, and trigger a re-render.
+    filterNameEl.addEventListener('input', () => renderWall(allConfessions));
+    sortByEl.addEventListener('change', () => renderWall(allConfessions));
+
+    // Clear All button - now only clears local display, not the Firebase database.
+    // To clear the database, you'd need authenticated admin access and different rules.
+    clearAllBtn.addEventListener('click', () => {
+      alert('This button was for clearing local storage. Since confessions are now public on Firebase, it no longer has a function to clear the "wall" for everyone. To remove a confession, you would need to implement an authenticated deletion feature.');
+    });
+
+
+    // --- Firebase Realtime Database Listener ---
+    // This listens for changes in your 'messages' path and updates the UI
+    messagesRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      const loadedConfessions = [];
+      for (let key in data) {
+        loadedConfessions.push({
+          id: key, // Firebase unique key
+          ...data[key] // The confession data
+        });
+      }
+      allConfessions = loadedConfessions; // Store the fetched confessions
+      renderWall(allConfessions); // Re-render the wall with all confessions
+    });
+
+    // Initial render is now handled by the Firebase listener,
+    // so `renderWall()` call here would be redundant.
   </script>
 </body>
 </html>
